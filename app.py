@@ -1,38 +1,17 @@
+import os
 import streamlit as st
 import joblib
-import numpy as np
-import pandas as pd
 
-#  Load the trained model, scaler, and encoders
-model = joblib.load("linear_regression.pkl")
-scaler = joblib.load("scaler.pkl")
-label_encoders = joblib.load("label_encoders.pkl")  # If categorical encoding was used
+# ✅ Ensure correct file paths
+MODEL_PATH = os.path.join(os.getcwd(), "linear_regression.pkl")
+SCALER_PATH = os.path.join(os.getcwd(), "scaler.pkl")
+ENCODERS_PATH = os.path.join(os.getcwd(), "label_encoders.pkl")
 
-# Streamlit UI
-st.title("IBD Prediction App (Linear Regression)")
-
-st.write("Enter patient details to predict IBD outcome:")
-
-# Create dynamic input fields based on dataset
-feature_inputs = {}
-for col in ["Feature1", "Feature2"]:  # Replace with actual feature names from your dataset
-    feature_inputs[col] = st.number_input(f"Enter {col}", min_value=0, max_value=100, value=50)
-
-# Make Prediction
-if st.button("Predict"):
-    # Convert user input to a DataFrame
-    input_df = pd.DataFrame([feature_inputs])
-
-    # Encode categorical features if necessary
-    for col, le in label_encoders.items():
-        if col in input_df:
-            input_df[col] = le.transform(input_df[col])
-
-    # Standardize input features
-    input_scaled = scaler.transform(input_df)
-
-    # Predict using the model
-    prediction = model.predict(input_scaled)
-    
-    # Show result
-    st.write(f" Predicted IBD Type: {prediction[0]:.2f}")
+# ✅ Load model, scaler, and encoders
+try:
+    model = joblib.load(MODEL_PATH)
+    scaler = joblib.load(SCALER_PATH)
+    label_encoders = joblib.load(ENCODERS_PATH)
+    st.success("✅ Model and encoders loaded successfully!")
+except FileNotFoundError:
+    st.error("❌ One or more files are missing. Please check your GitHub repository.")
